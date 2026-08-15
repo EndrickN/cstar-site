@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSTAR — Liquid Rocket Engine Design Suite</title>
+<meta name="description" content="Preliminary design and analysis of liquid rocket engine thrust chambers: equilibrium thermochemistry validated against NASA CEA, conjugate heat transfer with regenerative cooling, and structural margins. Windows desktop application.">
+<link rel="icon" href="assets/logo.png">
+
+<meta property="og:title" content="CSTAR — Liquid Rocket Engine Design Suite">
+<meta property="og:description" content="Thermochemistry validated against NASA CEA across 145 operating points. Conjugate heat transfer. Structural margins. One workflow.">
+<meta property="og:image" content="assets/flowfield.png">
+<meta property="og:type" content="website">
+
+<style>
+@font-face { font-family:'Geist'; src:url('assets/fonts/Geist-Variable.woff2') format('woff2'); font-weight:100 900; font-display:swap; }
+@font-face { font-family:'Geist Mono'; src:url('assets/fonts/GeistMono-Variable.woff2') format('woff2'); font-weight:100 900; font-display:swap; }
+
+:root{
+  --bg-deep:#090d16; --bg-panel:#0f172a; --bg-raise:#131c31;
+  --border:#1e293b; --border-soft:#18233c;
+  --accent:#00b4ff; --green:#84cc16; --warn:#f59e0b; --danger:#f43f5e;
+  --text:#f8fafc; --text-2:#94a3b8; --text-3:#64748b;
+  --radius:10px;
+  --font:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'Geist Mono','JetBrains Mono','Fira Code',Consolas,monospace;
+  --wrap:1140px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg-deep);color:var(--text);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono)}
+
+/* ---------- nav ---------- */
+.nav{position:sticky;top:0;z-index:50;background:rgba(9,13,22,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:62px;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand img{width:28px;height:28px;border-radius:7px;border:1px solid var(--border)}
+.brand b{font-size:17px;letter-spacing:.4px}
+.chip{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;background:var(--border);color:var(--accent)}
+.nav-links{display:flex;align-items:center;gap:26px}
+.nav-links a{color:var(--text-2);text-decoration:none;font-size:14px;transition:color .18s}
+.nav-links a:hover{color:var(--text)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid transparent;border-radius:8px;
+  font-size:14px;font-weight:700;padding:11px 20px;cursor:pointer;text-decoration:none;transition:all .18s;font-family:var(--font)}
+.btn-primary{background:var(--accent);color:#ffffff}
+.btn-primary:hover{background:#38c2ff;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text);border-color:#2b3a55}
+.btn-ghost:hover{background:rgba(255,255,255,.05);border-color:var(--text-3)}
+.btn-sm{padding:8px 15px;font-size:13px}
+.btn[data-unset="1"]{opacity:.55;cursor:not-allowed}
+
+/* ---------- hero ---------- */
+.hero{padding:76px 0 56px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;top:-320px;left:50%;transform:translateX(-50%);width:1000px;height:640px;
+  background:radial-gradient(ellipse at center,rgba(0,180,255,.10),transparent 66%);pointer-events:none}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--accent);border:1px solid rgba(0,180,255,.28);background:rgba(0,180,255,.07);
+  padding:5px 12px;border-radius:999px;margin-bottom:22px}
+h1{font-size:clamp(34px,5.2vw,58px);line-height:1.08;letter-spacing:-.022em;font-weight:800;max-width:16ch}
+.hero p.lede{margin-top:20px;font-size:clamp(16px,1.7vw,19px);color:var(--text-2);max-width:60ch}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px;align-items:center}
+.cta-note{font-family:var(--mono);font-size:12px;color:var(--text-3)}
+
+/* ---------- app window mock ---------- */
+.appwin{margin-top:52px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--bg-panel);
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.03)}
+.appbar{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--bg-panel);border-bottom:1px solid var(--border)}
+.appbar-l{display:flex;align-items:center;gap:9px}
+.appbar-l img{width:22px;height:22px;border-radius:6px;border:1px solid var(--border)}
+.appbar-l b{font-size:13.5px}
+.badge-std{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:4px;
+  background:rgba(132,204,22,.15);color:var(--green);border:1px solid rgba(132,204,22,.35)}
+.dots{display:flex;gap:6px}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--border);display:block}
+.apptabs{display:flex;gap:6px;padding:10px 14px;background:var(--bg-deep);border-bottom:1px solid var(--border);overflow-x:auto}
+.apptab{font-size:11.5px;padding:5px 11px;border-radius:6px;border:1px solid var(--border);color:var(--text-2);white-space:nowrap}
+.apptab.on{background:var(--accent);color:#ffffff;border-color:var(--accent);font-weight:700}
+.appbody{background:var(--bg-panel);padding:0}
+.appbody img{width:100%}
+
+/* KPI strip inside the mock */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:10px;padding:14px;background:var(--bg-deep);border-bottom:1px solid var(--border)}
+.kpi{background:var(--bg-panel);border:1px solid var(--border);border-radius:9px;padding:10px 12px}
+.kpi span{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3)}
+.kpi b{font-family:var(--mono);font-size:19px;font-weight:700;display:block;margin-top:5px}
+.kpi i{font-family:var(--mono);font-size:10px;color:var(--text-3);font-style:normal}
+
+/* ---------- sections ---------- */
+section{padding:74px 0;border-top:1px solid var(--border-soft)}
+.sec-head{max-width:62ch;margin-bottom:44px}
+.sec-tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+h2{font-size:clamp(26px,3.4vw,38px);line-height:1.16;letter-spacing:-.018em;font-weight:800}
+.sec-head p{margin-top:14px;color:var(--text-2);font-size:16.5px}
+h3{font-size:19px;font-weight:700;letter-spacing:-.01em}
+
+/* validation table */
+.vtable{width:100%;border-collapse:collapse;font-size:14.5px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.vtable th{text-align:left;padding:13px 16px;background:var(--bg-panel);font-size:11px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--text-3);font-weight:700;border-bottom:1px solid var(--border)}
+.vtable td{padding:14px 16px;border-bottom:1px solid var(--border-soft);color:var(--text-2)}
+.vtable tr:last-child td{border-bottom:none}
+.vtable td:first-child{color:var(--text);font-weight:600}
+.vtable .num{font-family:var(--mono);color:var(--green)}
+.scroll-x{overflow-x:auto}
+
+/* feature grid */
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:22px}
+.fcard{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s,transform .2s}
+.fcard:hover{border-color:#2b3a55;transform:translateY(-2px)}
+.fcard img{border-bottom:1px solid var(--border);background:var(--bg-panel)}
+.fcard-t{padding:20px}
+.fcard-t p{margin-top:9px;color:var(--text-2);font-size:14.5px}
+
+/* editions */
+.eds{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:22px;align-items:stretch;max-width:880px;margin:0 auto}
+.ed{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:28px;position:relative;display:flex;flex-direction:column}
+.ed.pro{border-color:rgba(0,180,255,.45);box-shadow:0 0 0 1px rgba(0,180,255,.14),0 18px 50px -22px rgba(0,180,255,.35)}
+.ed-name{font-family:var(--mono);font-size:12px;letter-spacing:.08em;font-weight:700}
+.ed.demo .ed-name{color:var(--warn)}
+.ed.pro .ed-name{color:var(--green)}
+.ed-price{font-size:38px;font-weight:800;letter-spacing:-.02em;margin:14px 0 4px}
+.ed-price small{font-size:14px;font-weight:600;color:var(--text-3)}
+.ed-note{color:var(--text-3);font-size:13.5px;margin-bottom:22px}
+.ed ul{list-style:none;margin:22px 0;flex:1}
+.ed li{display:flex;gap:11px;padding:7px 0;font-size:14.5px;color:var(--text-2);align-items:flex-start}
+.ed li b{color:var(--text);font-weight:600}
+.tick{color:var(--green);flex-shrink:0;font-weight:700}
+.lock{color:var(--text-3);flex-shrink:0}
+.ed .btn{width:100%;margin-top:6px}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;counter-reset:s}
+.step{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;counter-increment:s;position:relative}
+.step::before{content:counter(s);position:absolute;top:20px;right:22px;font-family:var(--mono);font-size:34px;font-weight:800;color:var(--border)}
+.step h3{font-size:16.5px;margin-bottom:8px}
+.step p{color:var(--text-2);font-size:14.5px}
+
+/* limits / honesty block */
+.limits{background:var(--bg-panel);border:1px solid var(--border);border-left:3px solid var(--warn);border-radius:var(--radius);padding:30px}
+.limits ul{list-style:none;margin-top:18px}
+.limits li{padding:9px 0 9px 22px;position:relative;color:var(--text-2);font-size:15px;border-bottom:1px solid var(--border-soft)}
+.limits li:last-child{border-bottom:none}
+.limits li::before{content:"—";position:absolute;left:0;color:var(--warn)}
+.limits li b{color:var(--text)}
+
+/* faq */
+.faq details{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:11px;background:var(--bg-panel);overflow:hidden}
+.faq summary{padding:17px 20px;cursor:pointer;font-weight:600;font-size:15.5px;list-style:none;display:flex;justify-content:space-between;gap:16px;align-items:center}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-family:var(--mono);color:var(--accent);font-size:19px;flex-shrink:0}
+.faq details[open] summary::after{content:"−"}
+.faq p{padding:0 20px 19px;color:var(--text-2);font-size:14.5px}
+
+/* final cta */
+.final{text-align:center;padding:88px 0}
+.final h2{max-width:19ch;margin:0 auto}
+.final p{max-width:56ch;margin:16px auto 0;color:var(--text-2)}
+.final .hero-cta{justify-content:center}
+
+footer{border-top:1px solid var(--border);padding:40px 0;color:var(--text-3);font-size:13.5px}
+.foot-in{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+footer a{color:var(--text-2);text-decoration:none}
+footer a:hover{color:var(--text)}
+.disclaimer{margin-top:22px;padding-top:22px;border-top:1px solid var(--border-soft);max-width:80ch;line-height:1.65}
+
+@media(max-width:820px){
+  .nav-links{display:none}
+  .hero{padding:52px 0 36px}
+  section{padding:56px 0}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<nav class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="#top"><img src="assets/logo.png" alt=""><b>CSTAR</b><span class="chip">v1.0</span></a>
+    <div class="nav-links">
+      <a href="#capabilities">Capabilities</a>
+      <a href="#validation">Validation</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a class="btn btn-primary btn-sm" data-buy href="#pricing">Buy</a>
+  </div>
+</nav>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="eyebrow">Liquid Rocket Engine Design Suite</div>
+    <h1>Size a thrust chamber without guessing.</h1>
+    <p class="lede">
+      Equilibrium thermochemistry, nozzle profiling, conjugate heat transfer with
+      regenerative cooling, and structural margins — one workflow, one desktop
+      application, and every model states what it was validated against.
+    </p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" data-demo href="#pricing">↓ Download the demo</a>
+      <a class="btn btn-ghost" data-buy href="#pricing">Buy — <span data-price>—</span></a>
+      <span class="cta-note">Windows 10/11 · offline · no account</span>
+    </div>
+
+    <!-- real solver output, in an app frame -->
+    <div class="appwin">
+      <div class="appbar">
+        <div class="appbar-l">
+          <img src="assets/logo.png" alt="">
+          <b>CSTAR</b><span class="chip">v1.0</span><span class="badge-std">STANDARD</span>
+        </div>
+        <div class="dots"><i></i><i></i><i></i></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><span>Vacuum Thrust</span><b>54.06</b><i>kN · SL 45.91 kN</i></div>
+        <div class="kpi"><span>Specific Impulse</span><b>326.9</b><i>s vacuum</i></div>
+        <div class="kpi"><span>Exit Mach</span><b>3.67</b><i>CEA equilibrium</i></div>
+        <div class="kpi"><span>Peak Heat Flux</span><b>50.1</b><i>MW/m² · wall 482 K</i></div>
+        <div class="kpi"><span>Melting SF</span><b>2.82</b><i>yield SF 1.28</i></div>
+      </div>
+      <div class="apptabs">
+        <div class="apptab on">Nozzle Flowfield</div>
+        <div class="apptab">Gas Dynamics</div>
+        <div class="apptab">Heat Flux</div>
+        <div class="apptab">Thermal Profile</div>
+        <div class="apptab">Structural</div>
+      </div>
+      <div class="appbody"><img src="assets/flowfield.png" alt="Nozzle contour shaded by local Mach number"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════ VALIDATION ═══════════════ -->
+<section id="validation">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">Validation</div>
+      <h2>Numbers you can check, not claims you have to trust.</h2>
+      <p>
+        Most engine calculators are a spreadsheet with the isentropic relations in it.
+        CSTAR carries its own Gibbs-minimisation thermochemistry solver, and every
+        release is gated on a test suite that compares it against reference codes.
+        Here is what that suite reports.
+      </p>
+    </div>
+    <div class="scroll-x">
+      <table class="vtable">
+        <thead><tr><th>Module</th><th>Checked against</th><th>Worst deviation</th><th>Points</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Equilibrium thermochemistry</td>
+            <td>NASA CEA</td>
+            <td class="num">Tc 2.7 K · γ 0.01 % · Isp 0.03 %</td>
+            <td class="num">145</td>
+          </tr>
+          <tr>
+            <td>Coolant properties</td>
+            <td>CoolProp (NIST-grade EOS)</td>
+            <td class="num">ρ 2.0 % · cp 4.2 % · μ 3.0 %</td>
+            <td class="num">6 000</td>
+          </tr>
+          <tr>
+            <td>Nozzle contour (planar MoC)</td>
+            <td>Exact Prandtl–Meyer theory</td>
+            <td class="num">Mach 0.003 % · mass 0.03 %</td>
+            <td class="num">16</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:20px;color:var(--text-3);font-size:14px">
+      Thermochemistry is validated across Pc = 10–250 bar and ε = 4–150 — the envelope
+      you actually work in, not a single convenient operating point.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════ CAPABILITIES ═══════════════ -->
+<section id="capabilities">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">Capabilities</div>
+      <h2>The whole chamber, in one solve.</h2>
+      <p>Every image below is real output from the example engine that ships with the application.</p>
+    </div>
+    <div class="fgrid">
+      <div class="fcard">
+        <img src="assets/gasdynamics.png" alt="Pressure, temperature, Mach and velocity along the axis">
+        <div class="fcard-t">
+          <h3>Thermochemistry &amp; gas dynamics</h3>
+          <p>
+            Gibbs-minimisation equilibrium over 17 species with condensed carbon, frozen
+            nozzle expansion on the real contour areas, and a two-branch area–Mach solver
+            with self-consistent variable γ. Six propellant combinations built in.
+          </p>
+        </div>
+      </div>
+      <div class="fcard">
+        <img src="assets/thermal.png" alt="Heat flux and wall temperature distributions">
+        <div class="fcard-t">
+          <h3>Conjugate heat transfer</h3>
+          <p>
+            Bartz on real gas properties, Gnielinski with roughness-aware friction, and
+            Sieder–Tate at the coolant-side wall. Coolant density, heat capacity,
+            viscosity and conductivity vary with local temperature <em>and</em> pressure —
+            five fluids from NIST-grade tables. Channel lands are solved as fins.
+          </p>
+        </div>
+      </div>
+      <div class="fcard">
+        <img src="assets/structural.png" alt="von Mises stress and safety factor along the axis">
+        <div class="fcard-t">
+          <h3>Structural margins</h3>
+          <p>
+            The liner is treated as what it is — a thin wall spanning between cooling
+            channel lands, loaded by the real coolant-to-gas pressure difference and the
+            through-thickness gradient. Yield, jacket hoop, liner buckling and a
+            low-cycle-fatigue screening figure, all four at once.
+          </p>
+        </div>
+      </div>
+      <div class="fcard">
+        <img src="assets/flowfield.png" alt="Nozzle contour shaded by Mach number">
+        <div class="fcard-t">
+          <h3>Exports an engineer can hand over</h3>
+          <p>
+            Per-station CSV, nozzle profile as CAD-ready coordinates, a styled Excel
+            workbook, and a full PDF report with the charts, the model description and
+            the stated limits included.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ PRICING ═══════════════ -->
+<section id="pricing">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">Editions</div>
+      <h2>Try the gas dynamics free. Pay for the hard part.</h2>
+      <p>
+        The demo is the same executable, not a crippled build. It runs your engine and
+        shows you the flow solution. Heat transfer, cooling and structural analysis —
+        the reason the tool exists — are what you are buying.
+      </p>
+    </div>
+    <div class="eds">
+      <div class="ed demo">
+        <div class="ed-name">DEMO</div>
+        <div class="ed-price">Free</div>
+        <div class="ed-note">Evaluation only · watermarked output</div>
+        <ul>
+          <li><span class="tick">✓</span><span>Nozzle geometry &amp; <b>flowfield</b></span></li>
+          <li><span class="tick">✓</span><span>Gas dynamics — M, P, T, v</span></li>
+          <li><span class="tick">✓</span><span>Thrust, specific impulse, mass flow</span></li>
+          <li><span class="tick">✓</span><span>Runs on <b>your</b> engine, not a fixed sample</span></li>
+          <li><span class="lock">🔒</span><span>Heat flux &amp; wall temperatures</span></li>
+          <li><span class="lock">🔒</span><span>Regenerative cooling circuit</span></li>
+          <li><span class="lock">🔒</span><span>Structural margins &amp; fatigue</span></li>
+          <li><span class="lock">🔒</span><span>CSV / CAD / Excel / PDF export</span></li>
+        </ul>
+        <a class="btn btn-ghost" data-demo href="#">↓ Download demo</a>
+      </div>
+
+      <div class="ed pro">
+        <div class="ed-name">STANDARD</div>
+        <div class="ed-price"><span data-price>—</span> <small data-price-note></small></div>
+        <div class="ed-note">One machine · offline · no subscription</div>
+        <ul>
+          <li><span class="tick">✓</span><span><b>Everything in DEMO</b>, without the watermark</span></li>
+          <li><span class="tick">✓</span><span>Conjugate heat transfer &amp; wall temperatures</span></li>
+          <li><span class="tick">✓</span><span>Regenerative cooling with real coolant properties</span></li>
+          <li><span class="tick">✓</span><span>Structural margins, buckling, fatigue screening</span></li>
+          <li><span class="tick">✓</span><span>All four export formats</span></li>
+          <li><span class="tick">✓</span><span>Full documentation incl. validation report</span></li>
+          <li><span class="tick">✓</span><span>Works fully offline — no phone-home</span></li>
+        </ul>
+        <a class="btn btn-primary" data-buy href="#">Buy CSTAR</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ HOW LICENSING WORKS ═══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">How it works</div>
+      <h2>Three steps, then it is yours offline.</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <h3>Download &amp; run</h3>
+        <p>One self-contained executable. No Python, no installer dependencies, no account. It opens in DEMO and immediately solves the bundled example engine.</p>
+      </div>
+      <div class="step">
+        <h3>Buy &amp; send your Hardware ID</h3>
+        <p>After purchase, copy the Hardware ID shown in the activation dialog and send it over. It is a 16-character code derived from your machine — no personal data.</p>
+      </div>
+      <div class="step">
+        <h3>Paste your key</h3>
+        <p>You get back an RSA-signed license key bound to that machine. Paste it and STANDARD unlocks instantly. It keeps working with no internet connection, forever.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ HONEST LIMITS ═══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-tag">Before you buy</div>
+      <h2>What this tool is not.</h2>
+      <p>
+        You are an engineer. You would find these out anyway, and you would trust the
+        rest less for having had to dig. So here they are.
+      </p>
+    </div>
+    <div class="limits">
+      <ul>
+        <li><b>It is a preliminary design aid.</b> Not certified by any aviation, space or standards authority. Everything it outputs needs independent verification before it touches hardware.</li>
+        <li><b>Heat transfer inherits the Bartz correlation's ±20–30 % scatter</b> against hot-fire data. That is a property of the method, not of the implementation, and no amount of numerical care removes it.</li>
+        <li><b>Gas radiation is a grey-gas approximation.</b> Real H₂O/CO₂ emission is band-structured. The magnitude lands in the right range; the model is crude, and the coefficients are exposed so you can calibrate against your own data.</li>
+        <li><b>Structural analysis is closed-form thin-wall, not FEA.</b> No land fillets, no creep, no bulging mode. The fatigue number is a screening estimate with generic constants — it ranks designs, it does not qualify hardware.</li>
+        <li><b>The nozzle contour is a Rao parabolic approximation</b>, not a characteristic solution. A verified planar method-of-characteristics ships alongside it; the axisymmetric branch is not validated and refuses to run rather than return something unverified.</li>
+        <li><b>Flow is one-dimensional.</b> No shocks, no separation prediction, no film cooling, no combustion instability.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FAQ ═══════════════ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-tag">FAQ</div><h2>Questions worth asking.</h2></div>
+    <div class="faq">
+      <details open><summary>Can I run my own engine in the demo, or only a fixed sample?</summary>
+        <p>Your own. Every input is editable in DEMO and the solver runs your geometry, propellant and chamber conditions. What DEMO withholds is the thermal, cooling and structural results — those are not merely hidden in the interface, an unlicensed run does not compute them for delivery at all.</p></details>
+      <details><summary>Is it really validated against NASA CEA, or is that marketing?</summary>
+        <p>Really. The comparison runs through the official CEA code via the rocketcea wrapper, across 145 operating points spanning 10–250 bar chamber pressure and area ratios of 4 to 150. The test suite ships with the application and prints the worst-case deviation for every quantity against a documented tolerance. You can run it yourself.</p></details>
+      <details><summary>Does it need an internet connection?</summary>
+        <p>No — not to run, not to activate, not ever. There is no activation server, no telemetry and no phone-home. The license key is verified locally against a public key compiled into the application. Air-gapped machines work fine.</p></details>
+      <details><summary>What happens if I change my hardware?</summary>
+        <p>The Hardware ID is derived from your Windows installation GUID, processor and architecture. It deliberately excludes network adapter addresses, so VPNs, docking stations and virtual machines do not disturb it. Reinstalling Windows or moving to a different machine does change it — contact us and we re-issue.</p></details>
+      <details><summary>Which propellants and coolants are supported?</summary>
+        <p>Propellants: methalox, kerolox, hydrolox, ethanol, methanol and propane, all with LOX. Coolants with full temperature- and pressure-dependent properties: methane, hydrogen, oxygen, RP-1 and ethanol. Any other fluid can be entered as constant properties.</p></details>
+      <details><summary>Can I use it commercially?</summary>
+        <p>Yes. A STANDARD license covers commercial use on one machine. Need several seats? Get in touch and we will sort it out.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FINAL CTA ═══════════════ -->
+<section class="final">
+  <div class="wrap">
+    <h2>See it solve your engine first.</h2>
+    <p>The demo takes a minute and runs your real geometry. If the flow solution does not convince you, nothing on this page should.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" data-demo href="#">↓ Download the demo</a>
+      <a class="btn btn-ghost" data-buy href="#">Buy — <span data-price>—</span></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-in">
+      <div class="brand"><img src="assets/logo.png" alt=""><b>CSTAR</b><span class="chip">v1.0</span></div>
+      <div><a data-contact href="#">Contact</a></div>
+    </div>
+    <p class="disclaimer">
+      CSTAR is a preliminary design and analysis aid for liquid rocket engine thrust
+      chambers. It is not certified or approved by any aviation, space, defence or
+      standards authority. All output consists of engineering estimates that require
+      independent verification, and the user remains responsible for every engineering
+      decision taken on their basis. Liquid rocket engines store and release large
+      amounts of energy — independent analysis, qualified review and physical testing
+      are mandatory before building hardware.
+    </p>
+    <p style="margin-top:18px">© 2026 · All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   SITE CONFIGURATION — this is the only block you need to edit.
+   ═══════════════════════════════════════════════════════════════════════════
+
+   PAYMENT: paste a checkout link into `buyUrl`. Any provider works, because a
+   link is all this page needs. Examples of what to paste:
+
+     Lemon Squeezy   https://yourstore.lemonsqueezy.com/checkout/buy/<uuid>
+     Gumroad         https://yourname.gumroad.com/l/cstar
+     Paddle          https://pay.paddle.io/hsc_<id>
+     Stripe          https://buy.stripe.com/<id>          (Payment Link)
+     BTCPay Server   https://btcpay.yourdomain.com/api/v1/invoices?...  (pay button)
+
+   Lemon Squeezy and Paddle act as merchant of record — they handle VAT and
+   sales tax worldwide for you, which is worth the fee when selling across
+   borders. Stripe and BTCPay leave the tax handling to you.
+
+   DOWNLOAD: `demoUrl` should point straight at the built executable. Any static
+   host works — the same one serving this page, an S3/R2 bucket, or a GitHub
+   release asset.
+
+   Leave a field empty and its button falls back to the contact email, so the
+   page is never broken while you are still setting things up.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+const SITE_CONFIG = {
+  price:        '€149',
+  priceNote:    'one-time',
+  buyUrl:       '',                         // ← checkout link
+  demoUrl:      '',                         // ← direct link to CSTAR_v1.0.exe
+  contactEmail: 'sales@example.com',        // ← your address
+};
+
+/* ─────────────── wiring (no need to touch below) ─────────────── */
+(function () {
+  const cfg = SITE_CONFIG;
+  const mailto = (subject) =>
+    `mailto:${cfg.contactEmail}?subject=${encodeURIComponent(subject)}`;
+
+  document.querySelectorAll('[data-price]').forEach(el => el.textContent = cfg.price);
+  document.querySelectorAll('[data-price-note]').forEach(el => el.textContent = cfg.priceNote);
+
+  document.querySelectorAll('[data-buy]').forEach(a => {
+    if (cfg.buyUrl) {
+      a.href = cfg.buyUrl;
+      a.removeAttribute('data-unset');
+    } else if (a.getAttribute('href') !== '#pricing') {
+      // No checkout configured yet — take the enquiry by email rather than
+      // dead-ending the visitor.
+      a.href = mailto('CSTAR — purchase enquiry');
+      a.setAttribute('data-unset', '1');
+    }
+  });
+
+  document.querySelectorAll('[data-demo]').forEach(a => {
+    if (cfg.demoUrl) {
+      a.href = cfg.demoUrl;
+      a.setAttribute('download', '');
+      a.removeAttribute('data-unset');
+    } else if (a.getAttribute('href') !== '#pricing') {
+      a.href = mailto('CSTAR — demo download request');
+      a.setAttribute('data-unset', '1');
+    }
+  });
+
+  document.querySelectorAll('[data-contact]').forEach(a => {
+    a.href = mailto('CSTAR enquiry');
+    a.textContent = cfg.contactEmail;
+  });
+
+  // Warn the owner in the console while the page is still unconfigured.
+  if (!cfg.buyUrl || !cfg.demoUrl) {
+    console.warn(
+      '[CSTAR site] Not fully configured yet. Edit SITE_CONFIG in index.html:' +
+      (!cfg.buyUrl  ? '\n  · buyUrl  — checkout link' : '') +
+      (!cfg.demoUrl ? '\n  · demoUrl — direct link to the demo executable' : '')
+    );
+  }
+})();
+</script>
+</body>
+</html>
