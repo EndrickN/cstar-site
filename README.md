@@ -26,7 +26,7 @@ const SITE_CONFIG = {
   buyUrl:       '',                    // ← NOWPayments checkout link
   buyCardUrl:   '',                    // ← optional card checkout
   demoUrl:      '',                    // ← direct link to CSTAR_v1.0.exe
-  contactEmail: 'sales@example.com',   // ← your address
+  contactEmail: 'cstar.propulsion@gmail.com',
 };
 ```
 
