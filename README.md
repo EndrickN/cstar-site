@@ -76,7 +76,7 @@ payment → activate.html → buyer sends Hardware ID → you run keygen → key
 On your side that is one command:
 
 ```
-python keygen.py issue
+python tools/keygen.py issue
 ```
 
 It asks for the Hardware ID, customer, validity and a note, then prints the key
