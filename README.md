@@ -25,7 +25,7 @@ const SITE_CONFIG = {
   priceNote:    'one-time',
   buyUrl:       '',                    // ← NOWPayments checkout link
   buyCardUrl:   '',                    // ← optional card checkout
-  demoUrl:      '',                    // ← direct link to CSTAR_v1.0.exe
+  demoUrl:      'https://github.com/EndrickN/cstar-site/releases/latest/download/CSTAR_v1.0.exe',
   contactEmail: 'cstar.propulsion@gmail.com',
 };
 ```
@@ -139,7 +139,7 @@ allows up to 2 GB, and gives you download counts, which is your first real signa
 about the funnel. Then:
 
 ```js
-demoUrl: 'https://github.com/USER/REPO/releases/latest/download/CSTAR_v1.0.exe'
+demoUrl: 'https://github.com/EndrickN/cstar-site/releases/latest/download/CSTAR_v1.0.exe'
 ```
 
 `latest/download` is a permanent link — new releases do not need a site edit.
