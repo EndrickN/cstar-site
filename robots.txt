@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /activate.html
+
+Sitemap: https://REPLACE-WITH-YOUR-DOMAIN/sitemap.xml

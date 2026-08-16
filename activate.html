@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activate CSTAR — thank you for your purchase</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/logo.png">
+<style>
+@font-face { font-family:'Geist'; src:url('assets/fonts/Geist-Variable.woff2') format('woff2'); font-weight:100 900; font-display:swap; }
+@font-face { font-family:'Geist Mono'; src:url('assets/fonts/GeistMono-Variable.woff2') format('woff2'); font-weight:100 900; font-display:swap; }
+
+:root{
+  --bg-deep:#090d16; --bg-panel:#0f172a; --border:#1e293b; --border-soft:#18233c;
+  --accent:#00b4ff; --green:#84cc16; --warn:#f59e0b;
+  --text:#f8fafc; --text-2:#94a3b8; --text-3:#64748b; --radius:10px;
+  --font:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'Geist Mono','JetBrains Mono',Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg-deep);color:var(--text);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;min-height:100vh}
+img{max-width:100%;display:block}
+a{color:var(--accent)}
+.wrap{max-width:760px;margin:0 auto;padding:0 24px}
+
+.nav{border-bottom:1px solid var(--border);background:rgba(9,13,22,.85)}
+.nav-in{display:flex;align-items:center;height:62px;gap:10px}
+.nav-in img{width:28px;height:28px;border-radius:7px;border:1px solid var(--border)}
+.nav-in b{font-size:17px;letter-spacing:.4px}
+.chip{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;background:var(--border);color:var(--accent)}
+
+header{padding:64px 0 8px;text-align:center;position:relative;overflow:hidden}
+header::before{content:"";position:absolute;top:-280px;left:50%;transform:translateX(-50%);
+  width:900px;height:560px;background:radial-gradient(ellipse at center,rgba(132,204,22,.10),transparent 66%);pointer-events:none}
+.ok{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--green);border:1px solid rgba(132,204,22,.3);background:rgba(132,204,22,.08);
+  padding:5px 13px;border-radius:999px;margin-bottom:20px}
+h1{font-size:clamp(28px,4.4vw,40px);line-height:1.14;letter-spacing:-.02em;font-weight:800}
+header p{margin-top:16px;color:var(--text-2);max-width:56ch;margin-left:auto;margin-right:auto}
+
+.steps{padding:44px 0 20px;counter-reset:s}
+.step{display:flex;gap:18px;padding:22px 0;border-bottom:1px solid var(--border-soft)}
+.step:last-child{border-bottom:none}
+.step-n{flex-shrink:0;width:34px;height:34px;border-radius:50%;border:1px solid var(--accent);
+  color:var(--accent);font-family:var(--mono);font-weight:700;font-size:15px;
+  display:flex;align-items:center;justify-content:center}
+.step h2{font-size:18px;font-weight:700;letter-spacing:-.01em;margin-bottom:6px}
+.step p{color:var(--text-2);font-size:15px}
+.step p+p{margin-top:10px}
+
+.hwid-demo{margin-top:14px;background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px 16px;font-family:var(--mono);font-size:15px;letter-spacing:.06em;color:var(--accent);text-align:center}
+.hwid-demo small{display:block;font-size:11px;letter-spacing:0;color:var(--text-3);margin-top:7px;font-family:var(--font)}
+
+.panel{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:26px;margin:8px 0 40px}
+.panel h2{font-size:18px;font-weight:700;margin-bottom:6px}
+.panel > p{color:var(--text-2);font-size:14.5px;margin-bottom:18px}
+label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:6px}
+input,textarea{width:100%;background:#0b1120;border:1px solid var(--border);border-radius:8px;padding:11px 13px;
+  color:var(--text);font-family:var(--mono);font-size:14px;outline:none;transition:border-color .18s,box-shadow .18s}
+input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,180,255,.13)}
+.field+.field{margin-top:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:20px;
+  border:1px solid transparent;border-radius:8px;font-size:15px;font-weight:700;padding:13px 20px;
+  cursor:pointer;text-decoration:none;font-family:var(--font);background:var(--accent);color:#fff;transition:background .18s}
+.btn:hover{background:#38c2ff}
+.hint{margin-top:14px;font-size:12.5px;color:var(--text-3);text-align:center}
+.err{color:var(--warn);font-size:13px;margin-top:10px;min-height:18px;font-family:var(--mono)}
+
+footer{border-top:1px solid var(--border);padding:30px 0 50px;color:var(--text-3);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="wrap nav-in">
+  <img src="assets/logo.png" alt=""><b>CSTAR</b><span class="chip">v1.0</span>
+</div></nav>
+
+<header>
+  <div class="wrap">
+    <div class="ok">✓ Payment received</div>
+    <h1>One more step to unlock STANDARD</h1>
+    <p>
+      Your licence is tied to the machine you will run CSTAR on, so it cannot be
+      issued until the application has told you its Hardware ID. That takes about
+      a minute.
+    </p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="steps">
+    <div class="step">
+      <div class="step-n">1</div>
+      <div>
+        <h2>Download and run CSTAR</h2>
+        <p>If you have not installed it yet, <a data-demo href="#">download the application</a> and run it. No installer, no account — it opens straight into DEMO mode.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">2</div>
+      <div>
+        <h2>Copy your Hardware ID</h2>
+        <p>Press <b>🔑 Activate</b> in the toolbar. The dialog shows a 16-character code — use <b>Copy HWID to Clipboard</b>.</p>
+        <div class="hwid-demo">A1B2-C3D4-E5F6-7890
+          <small>this is only an example — yours will differ</small></div>
+        <p>It is derived from your Windows installation and processor. It contains no personal data, and it does not change when you move house, switch networks or use a VPN.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">3</div>
+      <div>
+        <h2>Send it over</h2>
+        <p>Use the form below. Your key comes back by email, usually within a few hours. Paste it into the same dialog and STANDARD unlocks immediately — no restart.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Request your licence key</h2>
+    <p>Everything here goes straight into an email to us — nothing is stored on this page.</p>
+
+    <div class="field">
+      <label for="hwid">Hardware ID</label>
+      <input id="hwid" placeholder="A1B2-C3D4-E5F6-7890" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="email">Your email (where the key should go)</label>
+      <input id="email" type="email" placeholder="you@company.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label for="order">Order / payment reference <span style="text-transform:none;letter-spacing:0">(optional, speeds things up)</span></label>
+      <input id="order" placeholder="from your payment receipt" autocomplete="off">
+    </div>
+
+    <a class="btn" id="send" href="#">Send licence request</a>
+    <div class="err" id="err"></div>
+    <div class="hint">
+      Prefer plain email? Write to <a data-contact href="#">us</a> with your Hardware ID.
+    </div>
+  </div>
+</div>
+
+<footer><div class="wrap">
+  <a href="index.html">← Back to CSTAR</a> · © 2026
+</div></footer>
+
+<script>
+/* Keep this in step with SITE_CONFIG in index.html. */
+const SITE_CONFIG = {
+  demoUrl:      '',                         // ← direct link to CSTAR_v1.0.exe
+  contactEmail: 'sales@example.com',        // ← your address
+};
+
+(function () {
+  const cfg = SITE_CONFIG;
+  const $ = id => document.getElementById(id);
+  const mailto = (subject, body) =>
+    `mailto:${cfg.contactEmail}?subject=${encodeURIComponent(subject)}`
+    + (body ? `&body=${encodeURIComponent(body)}` : '');
+
+  document.querySelectorAll('[data-demo]').forEach(a => {
+    if (cfg.demoUrl) { a.href = cfg.demoUrl; a.setAttribute('download', ''); }
+    else a.href = mailto('CSTAR — demo download request');
+  });
+  document.querySelectorAll('[data-contact]').forEach(a => a.href = mailto('CSTAR — licence request'));
+
+  // Accept the Hardware ID however it was pasted: with or without dashes, in
+  // any case, and carrying whatever invisible characters a chat client added.
+  const clean = v => (v || '')
+    .replace(/[​-‏⁠﻿]/g, '')
+    .replace(/[^0-9a-fA-F]/g, '')
+    .toUpperCase();
+
+  const pretty = h => h.replace(/(.{4})(.{4})(.{4})(.{4})/, '$1-$2-$3-$4');
+
+  $('hwid').addEventListener('blur', e => {
+    const c = clean(e.target.value);
+    if (c.length === 16) e.target.value = pretty(c);
+  });
+
+  $('send').addEventListener('click', ev => {
+    ev.preventDefault();
+    const hwid = clean($('hwid').value);
+    const email = $('email').value.trim();
+    const order = $('order').value.trim();
+    const err = $('err');
+
+    if (hwid.length !== 16) {
+      err.textContent = 'The Hardware ID should be 16 characters, e.g. A1B2-C3D4-E5F6-7890.';
+      $('hwid').focus();
+      return;
+    }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      err.textContent = 'Please enter the email address your key should go to.';
+      $('email').focus();
+      return;
+    }
+    err.textContent = '';
+
+    const body =
+      'Hardware ID: ' + pretty(hwid) + '\n' +
+      'Email:       ' + email + '\n' +
+      'Order ref:   ' + (order || '(not given)') + '\n\n' +
+      'Please issue my CSTAR STANDARD licence key. Thank you.';
+    window.location.href = mailto('CSTAR licence request — ' + pretty(hwid), body);
+  });
+
+  if (/example\.com$/.test(cfg.contactEmail) || !cfg.demoUrl) {
+    console.warn('[CSTAR activate] Still placeholder config — set contactEmail and demoUrl.');
+  }
+})();
+</script>
+</body>
+</html>

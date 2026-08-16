@@ -1,123 +1,172 @@
 # CSTAR landing page
 
-A single static page. No build step, no framework, no dependencies — `index.html`
-plus the `assets/` folder is the whole site.
+Static site. No build step, no framework, no dependencies, no external requests
+— the folder is the site.
 
 ```
 site/
-  index.html          the page (styles and script inline)
-  assets/
-    flowfield.png     real solver output
-    gasdynamics.png   real solver output
-    thermal.png       real solver output
-    structural.png    real solver output
-    logo.png
-    fonts/            Geist + Geist Mono, same as the application
+  index.html        the landing page (styles + script inline)
+  activate.html     post-purchase page: collects the buyer's Hardware ID
+  404.html          styled not-found page
+  robots.txt        keeps activate.html out of search results
+  sitemap.xml
+  assets/           real solver output, logo, and the app's own fonts
 ```
 
 ---
 
-## 1. Connect payments — the only edit you must make
+## 1. Fill in SITE_CONFIG
 
-Open `index.html`, scroll to the bottom, and edit the `SITE_CONFIG` block:
+At the bottom of `index.html`:
 
 ```js
 const SITE_CONFIG = {
-  price:        '€149',
+  price:        '$149',
   priceNote:    'one-time',
-  buyUrl:       '',                    // ← paste your checkout link
+  buyUrl:       '',                    // ← NOWPayments checkout link
+  buyCardUrl:   '',                    // ← optional card checkout
   demoUrl:      '',                    // ← direct link to CSTAR_v1.0.exe
   contactEmail: 'sales@example.com',   // ← your address
 };
 ```
 
-That is all the wiring there is. Every Buy button on the page reads `buyUrl`,
-every download button reads `demoUrl`. Leave a field empty and its button falls
-back to a `mailto:` link, so the page is never broken while you are still
-setting things up — and the browser console tells you what is still missing.
+`activate.html` has its own smaller copy of `demoUrl` and `contactEmail` — keep
+the two in step.
 
-### What to paste into `buyUrl`
-
-Any provider that gives you a checkout URL works, because a URL is all the page
-needs.
-
-| Provider | What the link looks like | Notes |
-|---|---|---|
-| **Lemon Squeezy** | `https://yourstore.lemonsqueezy.com/checkout/buy/<uuid>` | Merchant of record — handles VAT/sales tax worldwide for you |
-| **Paddle** | `https://pay.paddle.io/hsc_<id>` | Merchant of record, same benefit |
-| **Gumroad** | `https://yourname.gumroad.com/l/cstar` | Simplest to set up, takes a larger cut |
-| **Stripe** | `https://buy.stripe.com/<id>` | Payment Link. Cheapest, but tax is your problem |
-| **BTCPay Server** | your own instance's pay-button URL | Self-hosted crypto, no intermediary, no KYC on you |
-
-If you are selling across borders, a **merchant of record** (Lemon Squeezy or
-Paddle) is usually worth the fee: they become the legal seller and deal with VAT
-in every jurisdiction, which is otherwise a genuine ongoing burden.
-
-### Delivering the license after payment
-
-Licensing is offline and machine-bound, so the flow is:
-
-1. customer pays → provider sends them a receipt,
-2. customer sends you their Hardware ID,
-3. you run `python keygen.py issue <HWID> -d 365 -n "Name"` and email the key back.
-
-Every provider above can show a custom "thank you" message or redirect after
-checkout — put the instruction there: *"Open CSTAR, copy your Hardware ID from
-the activation dialog, and reply to your receipt with it."* That single sentence
-removes almost all of the support load.
-
-Automate it later if volume justifies it: the provider fires a webhook, a small
-script calls the same `keygen.py issue`, and the key goes out by email.
+Anything left empty degrades to a `mailto:` link rather than dead-ending a
+visitor, and the browser console lists what is still missing. You can publish
+before payments are wired and take enquiries by email in the meantime.
 
 ---
 
-## 2. Host it
+## 2. NOWPayments, step by step
 
-Any static host. Drag-and-drop the `site/` folder:
+**Create the account** at nowpayments.io and confirm your email.
 
-- **Cloudflare Pages** — free, fast, custom domain included
-- **Netlify** — drag the folder onto the dashboard, done
-- **Vercel** — same
-- **GitHub Pages** — free if the repo is public
+**Add a payout wallet.** Nothing can be created until there is somewhere for the
+money to go. While you are here, switch on **auto-conversion to a stablecoin**
+(USDT/USDC). Without it, the amount you actually receive drifts with the market
+between the sale and the moment you look at the balance — for a fixed-price
+product that is pure downside.
 
-For the demo executable, either drop `CSTAR_v1.0.exe` into `assets/` and point
-`demoUrl` at `assets/CSTAR_v1.0.exe`, or host it as a GitHub release asset and
-link that. A release asset is usually better: it does not bloat the site deploy
-and you get download counts.
+**Create the payment link.** Set:
+
+| field | value |
+|---|---|
+| Price currency | **USD** — let the buyer pay in whatever coin they like; you quote in dollars |
+| Amount | 149 |
+| Order description | `CSTAR v1.0 — STANDARD licence` |
+| Success URL | `https://YOUR-DOMAIN/activate.html` |
+| Cancel URL | `https://YOUR-DOMAIN/#pricing` |
+
+**The success URL is the important one.** Licences are hardware-bound, so a key
+cannot exist until the buyer has run the app once and read their Hardware ID.
+`activate.html` walks them through exactly that. Point the success URL at a
+generic "thank you" page instead and you will answer *"I paid, where is my
+key?"* by hand for every sale.
+
+**Paste the link** into `buyUrl` and you are selling.
+
+### Fulfilment
+
+```
+payment → activate.html → buyer sends Hardware ID → you run keygen → key by email
+```
+
+On your side that is one command:
+
+```
+python keygen.py issue
+```
+
+It asks for the Hardware ID, customer, validity and a note, then prints the key
+and records it in your ledger. `keygen.py list` shows everything you have issued.
+
+Automate later if volume justifies it: NOWPayments fires an IPN webhook on
+confirmation, a small script verifies the signature and calls the same command.
+That needs a server running permanently, which early sales will not pay for.
+
+### Things worth knowing before the first sale
+
+- **Verification.** NOWPayments applies KYC at certain volumes and reviews what
+  you sell. Rocket-engine design software is not an everyday category — expect
+  to be asked, and answer plainly. Better than a freeze after money has moved.
+- **Fees** are around 0.5 % plus network. Cheap next to a merchant of record's
+  ~5 % — but an MoR also handles VAT and sales tax, and NOWPayments does not.
+  That is entirely yours.
+- **Underpayments** happen: network fees can leave a payment a few cents short.
+  Set a tolerance in the dashboard or those orders hang as "partially paid".
+- **No chargebacks.** Good for you. It also means a refund is a manual transfer,
+  so the demo is doing real work — let people convince themselves before paying.
+- **Bookkeeping.** Record the fiat rate at the moment of receipt, from the very
+  first payment. Reconstructing a year of rates afterwards is miserable.
+
+### Adding card payments later
+
+Set `buyCardUrl` and a second button appears automatically. Most engineers reach
+for a corporate card rather than a wallet, and a merchant of record (Paddle,
+Lemon Squeezy) becomes the legal seller and deals with VAT worldwide. Paddle
+also issues company invoices, which matters when the buyer expenses it.
+
+---
+
+## 3. Host it
+
+Any static host. Drag the folder onto **Cloudflare Pages**, **Netlify** or
+**Vercel**; all three are free with a custom domain and HTTPS.
+
+**GitHub Pages** works too, with two caveats:
+
+- Pages needs a **public** repository on the free plan. Publish only this
+  folder — never the application source, which sits one level up.
+- Pages serves from the repository root, `/docs`, or a branch. Put the contents
+  of `site/` at the root of that repository, not inside a `site/` folder.
 
 Test locally first:
 
-```bash
+```
 python -m http.server 8000
 ```
 
-then open `http://localhost:8000`. Opening `index.html` directly from disk works
-too, but relative paths behave better over HTTP.
+### The demo executable
+
+Do **not** commit the 55 MB binary. Git keeps every version forever, so ten
+rebuilds means 550 MB of history you cannot reclaim, and Pages has a ~100 GB
+monthly bandwidth allowance — about 1800 downloads at this size.
+
+Publish it as a **GitHub Release asset** instead: it stays out of the repository,
+allows up to 2 GB, and gives you download counts, which is your first real signal
+about the funnel. Then:
+
+```js
+demoUrl: 'https://github.com/USER/REPO/releases/latest/download/CSTAR_v1.0.exe'
+```
+
+`latest/download` is a permanent link — new releases do not need a site edit.
 
 ---
 
-## 3. Refreshing the screenshots
+## 4. Refreshing the screenshots
 
-The charts are real output, regenerated from the shipped example engine:
+The charts are genuine solver output, not mockups:
 
-```bash
+```
 python tools/build_site_assets.py
 ```
 
-Re-run it after any solver change so the site never shows stale numbers. It also
-prints the figures quoted in the hero KPI strip (thrust, Isp, wall temperature,
-safety factors) — if those change, update the numbers in `index.html` to match.
+Re-run after any solver change. It also prints the figures quoted in the hero
+KPI strip; if those move, update them in `index.html` to match.
 
 ---
 
-## 4. Before you go live
+## 5. Launch checklist
 
-- [ ] `buyUrl`, `demoUrl` and `contactEmail` filled in
-- [ ] Price checked (it appears in three places, all driven by `SITE_CONFIG`)
+- [ ] `buyUrl`, `demoUrl`, `contactEmail` set in **both** `index.html` and `activate.html`
+- [ ] NOWPayments success URL points at `https://YOUR-DOMAIN/activate.html`
+- [ ] Price checked — it appears in three places, all driven by `SITE_CONFIG`
 - [ ] Hero KPI numbers match the current build
-- [ ] Post-purchase instruction set in your payment provider
-- [ ] A real screenshot of the running application, if you want one in the hero
-      instead of the chart-in-a-frame composition
-- [ ] Legal pages: the footer disclaimer is deliberately strong but it is not a
-      substitute for terms of sale, a privacy notice, or — as a German business
-      — an Impressum
+- [ ] `CSTAR_v1.0.exe` uploaded as a release asset, link tested in a private window
+- [ ] Domain placeholders replaced in `robots.txt` and `sitemap.xml`
+- [ ] Console is clean on the published URL (it warns about missing config)
+- [ ] One test purchase end to end, including the activation email
+- [ ] Terms of sale, privacy notice, and — as a German business — an Impressum

@@ -132,6 +132,8 @@ h3{font-size:19px;font-weight:700;letter-spacing:-.01em}
 .tick{color:var(--green);flex-shrink:0;font-weight:700}
 .lock{color:var(--text-3);flex-shrink:0}
 .ed .btn{width:100%;margin-top:6px}
+.pay-note{margin-top:14px;font-size:12px;color:var(--text-3);line-height:1.5;text-align:center}
+.pay-note b{color:var(--text-2);font-weight:600}
 
 /* steps */
 .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;counter-reset:s}
@@ -383,6 +385,8 @@ footer a:hover{color:var(--text)}
           <li><span class="tick">✓</span><span>Works fully offline — no phone-home</span></li>
         </ul>
         <a class="btn btn-primary" data-buy href="#">Buy CSTAR</a>
+        <a class="btn btn-ghost" data-buy-card href="#" hidden>Pay by card</a>
+        <div class="pay-note" data-pay-note></div>
       </div>
     </div>
   </div>
@@ -493,31 +497,39 @@ footer a:hover{color:var(--text)}
    SITE CONFIGURATION — this is the only block you need to edit.
    ═══════════════════════════════════════════════════════════════════════════
 
-   PAYMENT: paste a checkout link into `buyUrl`. Any provider works, because a
-   link is all this page needs. Examples of what to paste:
+   buyUrl      Primary checkout. Built for NOWPayments, but any provider that
+               hands you a link works the same way:
+                 NOWPayments   https://nowpayments.io/payment/?iid=1234567890
+                 BTCPay        your instance's pay-button URL
+                 Gumroad       https://yourname.gumroad.com/l/cstar
+                 Stripe        https://buy.stripe.com/<id>
 
-     Lemon Squeezy   https://yourstore.lemonsqueezy.com/checkout/buy/<uuid>
-     Gumroad         https://yourname.gumroad.com/l/cstar
-     Paddle          https://pay.paddle.io/hsc_<id>
-     Stripe          https://buy.stripe.com/<id>          (Payment Link)
-     BTCPay Server   https://btcpay.yourdomain.com/api/v1/invoices?...  (pay button)
+   buyCardUrl  OPTIONAL second checkout for card payments. Leave it empty and
+               the button simply does not appear. Worth adding later: most
+               engineers reach for a corporate card, not a wallet, and a
+               merchant of record (Paddle, Lemon Squeezy) also takes VAT and
+               sales tax off your hands. Crypto processors do not.
 
-   Lemon Squeezy and Paddle act as merchant of record — they handle VAT and
-   sales tax worldwide for you, which is worth the fee when selling across
-   borders. Stripe and BTCPay leave the tax handling to you.
+   demoUrl     Direct link to the executable. A GitHub Release asset is the
+               best home for it — it does not bloat the site deploy, survives
+               rebuilds, and gives you download counts:
+                 https://github.com/USER/REPO/releases/latest/download/CSTAR_v1.0.exe
 
-   DOWNLOAD: `demoUrl` should point straight at the built executable. Any static
-   host works — the same one serving this page, an S3/R2 bucket, or a GitHub
-   release asset.
+   IMPORTANT — set your provider's success/return URL to activate.html on this
+   site. Licences are hardware-bound, so a buyer cannot receive a key until
+   they have run the app once and read their Hardware ID. That page tells them
+   exactly what to do; without it you will answer "I paid, where is my key?"
+   by hand for every single sale.
 
-   Leave a field empty and its button falls back to the contact email, so the
-   page is never broken while you are still setting things up.
+   Any field left empty degrades to a mailto: link rather than dead-ending the
+   visitor, and the browser console lists what is still missing.
    ═════════════════════════════════════════════════════════════════════════ */
 
 const SITE_CONFIG = {
-  price:        '€149',
+  price:        '$149',
   priceNote:    'one-time',
-  buyUrl:       '',                         // ← checkout link
+  buyUrl:       '',                         // ← NOWPayments checkout link
+  buyCardUrl:   '',                         // ← optional card checkout
   demoUrl:      '',                         // ← direct link to CSTAR_v1.0.exe
   contactEmail: 'sales@example.com',        // ← your address
 };
@@ -554,18 +566,40 @@ const SITE_CONFIG = {
     }
   });
 
+  // Optional card checkout — the button stays hidden unless a link is set.
+  document.querySelectorAll('[data-buy-card]').forEach(a => {
+    if (cfg.buyCardUrl) {
+      a.href = cfg.buyCardUrl;
+      a.hidden = false;
+    }
+  });
+
+  // Tell buyers how delivery works before they pay, not after. A hardware-bound
+  // licence cannot be issued at checkout, and finding that out afterwards feels
+  // like something went wrong.
+  document.querySelectorAll('[data-pay-note]').forEach(el => {
+    el.innerHTML = cfg.buyCardUrl
+      ? 'Pay by crypto or card. After payment you will be asked for your '
+        + '<b>Hardware ID</b> — the app shows it on first run — and your key '
+        + 'arrives by email.'
+      : 'Paid in crypto. After payment you will be asked for your '
+        + '<b>Hardware ID</b> — the app shows it on first run — and your key '
+        + 'arrives by email.';
+  });
+
   document.querySelectorAll('[data-contact]').forEach(a => {
     a.href = mailto('CSTAR enquiry');
     a.textContent = cfg.contactEmail;
   });
 
   // Warn the owner in the console while the page is still unconfigured.
-  if (!cfg.buyUrl || !cfg.demoUrl) {
-    console.warn(
-      '[CSTAR site] Not fully configured yet. Edit SITE_CONFIG in index.html:' +
-      (!cfg.buyUrl  ? '\n  · buyUrl  — checkout link' : '') +
-      (!cfg.demoUrl ? '\n  · demoUrl — direct link to the demo executable' : '')
-    );
+  const missing = [];
+  if (!cfg.buyUrl) missing.push('buyUrl — checkout link');
+  if (!cfg.demoUrl) missing.push('demoUrl — direct link to the demo executable');
+  if (/example\.com$/.test(cfg.contactEmail)) missing.push('contactEmail — still the placeholder');
+  if (missing.length) {
+    console.warn('[CSTAR site] Not ready to publish. Edit SITE_CONFIG in index.html:\n  · '
+                 + missing.join('\n  · '));
   }
 })();
 </script>
