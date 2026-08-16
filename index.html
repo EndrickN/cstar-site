@@ -86,7 +86,7 @@ h3{font-size:19px;font-weight:700;letter-spacing:-.01em}
 .scroll-x{overflow-x:auto}
 
 /* feature grid */
-.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:22px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(460px,100%),1fr));gap:22px}
 .fcard{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s,transform .2s}
 .fcard:hover{border-color:#2b3a55;transform:translateY(-2px)}
 .fcard img{border-bottom:1px solid var(--border);background:var(--bg-panel)}
@@ -94,7 +94,7 @@ h3{font-size:19px;font-weight:700;letter-spacing:-.01em}
 .fcard-t p{margin-top:9px;color:var(--text-2);font-size:14.5px}
 
 /* editions */
-.eds{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:22px;align-items:stretch;max-width:880px;margin:0 auto}
+.eds{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(330px,100%),1fr));gap:22px;align-items:stretch;max-width:880px;margin:0 auto}
 .ed{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:28px;position:relative;display:flex;flex-direction:column}
 .ed.pro{border-color:rgba(0,180,255,.45);box-shadow:0 0 0 1px rgba(0,180,255,.14),0 18px 50px -22px rgba(0,180,255,.35)}
 .ed-name{font-family:var(--mono);font-size:12px;letter-spacing:.08em;font-weight:700}
@@ -111,7 +111,7 @@ h3{font-size:19px;font-weight:700;letter-spacing:-.01em}
 .ed .btn{width:100%;margin-top:6px}
 
 /* steps */
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;counter-reset:s}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:22px;counter-reset:s}
 .step{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;counter-increment:s;position:relative}
 .step::before{content:counter(s);position:absolute;top:20px;right:22px;font-family:var(--mono);font-size:34px;font-weight:800;color:var(--border)}
 .step h3{font-size:16.5px;margin-bottom:8px}
@@ -147,8 +147,34 @@ footer a:hover{color:var(--text)}
 
 @media(max-width:820px){
   .nav-links{display:none}
-  .hero{padding:52px 0 36px}
+  .hero{padding:52px 0 40px}
   section{padding:56px 0}
+  /* A finger needs ~44px; the compact nav button was 39. */
+  .nav .btn-sm{padding:12px 17px}
+  /* The table is the one genuinely wide thing on the page. Tighten it so it
+     usually fits, and keep the scroll container for when it still does not. */
+  .vtable{font-size:13px}
+  .vtable th{padding:11px 12px;font-size:10px}
+  .vtable td{padding:11px 12px}
+}
+
+@media(max-width:600px){
+  /* Side-by-side buttons leave two cramped pills and orphan the note onto its
+     own line. Full width reads as two clear choices instead. */
+  .hero-cta{flex-direction:column;align-items:stretch;gap:10px}
+  .hero-cta .btn{width:100%}
+  .cta-note{text-align:center}
+  .final .hero-cta{align-items:stretch}
+  .wrap{padding:0 18px}
+  h1{font-size:31px}
+  .sec-head{margin-bottom:32px}
+  .sec-head p{font-size:15.5px}
+  .ed{padding:24px 20px}
+  .ed-price{font-size:34px}
+  .fcard-t{padding:18px}
+  .limits{padding:22px 20px}
+  .faq summary{padding:15px 17px;font-size:15px}
+  .faq p{padding:0 17px 17px}
 }
 </style>
 </head>
