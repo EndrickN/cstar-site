@@ -8,10 +8,18 @@ site/
   index.html        the landing page (styles + script inline)
   activate.html     post-purchase page: collects the buyer's Hardware ID
   404.html          styled not-found page
+  CNAME             the custom domain - see the warning below
   robots.txt        keeps activate.html out of search results
   sitemap.xml
   assets/           real solver output, logo, and the app's own fonts
 ```
+
+**Do not delete `CNAME`.** GitHub Pages reads the custom domain from that file.
+Setting the domain in the repository's Settings creates it on GitHub's side, but
+this repository is published with `git subtree push`, which overwrites the
+published tree - so a CNAME that exists only on GitHub is wiped by the next
+publish and the domain silently stops working. Keeping it in `site/` means it
+travels with everything else.
 
 ---
 

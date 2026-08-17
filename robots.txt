@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /activate.html
 
-Sitemap: https://endrickn.github.io/cstar-site/sitemap.xml
+Sitemap: https://www.cstar.space/sitemap.xml
