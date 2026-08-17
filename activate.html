@@ -49,6 +49,11 @@ header p{margin-top:16px;color:var(--text-2);max-width:56ch;margin-left:auto;mar
 .step p{color:var(--text-2);font-size:15px}
 .step p+p{margin-top:10px}
 
+.wait{margin-top:12px;padding:13px 15px;background:rgba(245,158,11,.07);
+  border:1px solid rgba(245,158,11,.28);border-left:3px solid var(--warn);
+  border-radius:8px;font-size:14px}
+.wait b{color:var(--warn)}
+
 .hwid-demo{margin-top:14px;background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);
   padding:14px 16px;font-family:var(--mono);font-size:15px;letter-spacing:.06em;color:var(--accent);text-align:center}
 .hwid-demo small{display:block;font-size:11px;letter-spacing:0;color:var(--text-3);margin-top:7px;font-family:var(--font)}
@@ -65,7 +70,13 @@ input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(
   border:1px solid transparent;border-radius:8px;font-size:15px;font-weight:700;padding:13px 20px;
   cursor:pointer;text-decoration:none;font-family:var(--font);background:var(--accent);color:#fff;transition:background .18s}
 .btn:hover{background:#38c2ff}
-.hint{margin-top:14px;font-size:12.5px;color:var(--text-3);text-align:center}
+.alt{margin-top:22px;padding-top:20px;border-top:1px solid var(--border-soft)}
+.alt p{font-size:13.5px;color:var(--text-3);line-height:1.55}
+.btn-alt{background:transparent;color:var(--text);border:1px solid #2b3a55;margin-top:12px}
+.btn-alt:hover{background:rgba(255,255,255,.05);border-color:var(--text-3)}
+.addr{margin-top:13px;text-align:center;font-size:13px}
+.addr b{font-family:var(--mono);color:var(--accent);font-weight:400;user-select:all}
+.ok-msg{color:var(--green);font-size:13px;margin-top:10px;text-align:center;min-height:18px;font-family:var(--mono)}
 .err{color:var(--warn);font-size:13px;margin-top:10px;min-height:18px;font-family:var(--mono)}
 
 footer{border-top:1px solid var(--border);padding:30px 0 50px;color:var(--text-3);font-size:13px;text-align:center}
@@ -96,7 +107,7 @@ footer{border-top:1px solid var(--border);padding:30px 0 50px;color:var(--text-3
     <p>
       Your licence is tied to the machine you will run CSTAR on, so it cannot be
       issued until the application has told you its Hardware ID. That takes about
-      a minute.
+      a minute, and then <b>your key arrives by email</b>.
     </p>
   </div>
 </header>
@@ -125,15 +136,17 @@ footer{border-top:1px solid var(--border);padding:30px 0 50px;color:var(--text-3
     <div class="step">
       <div class="step-n">3</div>
       <div>
-        <h2>Send it over</h2>
-        <p>Use the form below. Your key comes back by email, usually within a few hours. Paste it into the same dialog and STANDARD unlocks immediately — no restart.</p>
+        <h2>Send it over and watch your inbox</h2>
+        <p>Send us the Hardware ID with the form below. <b>Your licence key comes back by email</b> — paste it into the same dialog and STANDARD unlocks immediately, no restart needed.</p>
+        <p class="wait"><b>Keys are issued by hand, not by a robot.</b> Expect a few hours, and up to one business day if you have caught us asleep. Nothing more is needed from you in the meantime — and the demo keeps working while you wait.</p>
       </div>
     </div>
   </div>
 
   <div class="panel">
     <h2>Request your licence key</h2>
-    <p>Everything here goes straight into an email to us — nothing is stored on this page.</p>
+    <p>This composes an email to us — nothing is stored on this page. We reply to the
+       address you give below with your key.</p>
 
     <div class="field">
       <label for="hwid">Hardware ID</label>
@@ -148,10 +161,14 @@ footer{border-top:1px solid var(--border);padding:30px 0 50px;color:var(--text-3
       <input id="order" placeholder="from your payment receipt" autocomplete="off">
     </div>
 
-    <a class="btn" id="send" href="#">Send licence request</a>
+    <a class="btn" id="send" href="#">Send licence request by email</a>
     <div class="err" id="err"></div>
-    <div class="hint">
-      Prefer plain email? Write to <a data-contact href="#">us</a> with your Hardware ID.
+
+    <div class="alt">
+      <p>If that button does nothing, your browser has no email app configured.
+         Copy the details instead and send them from wherever you read mail:</p>
+      <a class="btn btn-alt" id="copy" href="#">Copy my details</a>
+      <p class="addr">Send to <b data-contact-text>—</b></p>
     </div>
   </div>
 </div>
@@ -178,7 +195,8 @@ const SITE_CONFIG = {
     if (cfg.demoUrl) { a.href = cfg.demoUrl; a.setAttribute('download', ''); }
     else a.href = mailto('CSTAR — demo download request');
   });
-  document.querySelectorAll('[data-contact]').forEach(a => a.href = mailto('CSTAR — licence request'));
+  document.querySelectorAll('[data-contact]').forEach(a => a.href = mailto('CSTAR - licence request'));
+  document.querySelectorAll('[data-contact-text]').forEach(e => e.textContent = cfg.contactEmail);
 
   // Accept the Hardware ID however it was pasted: with or without dashes, in
   // any case, and carrying whatever invisible characters a chat client added.
@@ -194,8 +212,8 @@ const SITE_CONFIG = {
     if (c.length === 16) e.target.value = pretty(c);
   });
 
-  $('send').addEventListener('click', ev => {
-    ev.preventDefault();
+  /* Collect and validate once; both buttons below use the result. */
+  function gather() {
     const hwid = clean($('hwid').value);
     const email = $('email').value.trim();
     const order = $('order').value.trim();
@@ -204,21 +222,66 @@ const SITE_CONFIG = {
     if (hwid.length !== 16) {
       err.textContent = 'The Hardware ID should be 16 characters, e.g. A1B2-C3D4-E5F6-7890.';
       $('hwid').focus();
-      return;
+      return null;
     }
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
       err.textContent = 'Please enter the email address your key should go to.';
       $('email').focus();
-      return;
+      return null;
     }
     err.textContent = '';
 
-    const body =
-      'Hardware ID: ' + pretty(hwid) + '\n' +
-      'Email:       ' + email + '\n' +
-      'Order ref:   ' + (order || '(not given)') + '\n\n' +
-      'Please issue my CSTAR STANDARD licence key. Thank you.';
-    window.location.href = mailto('CSTAR licence request — ' + pretty(hwid), body);
+    return {
+      subject: 'CSTAR licence request - ' + pretty(hwid),
+      body: 'Hardware ID: ' + pretty(hwid) + '\n'
+          + 'Email:       ' + email + '\n'
+          + 'Order ref:   ' + (order || '(not given)') + '\n\n'
+          + 'Please issue my CSTAR STANDARD licence key. Thank you.'
+    };
+  }
+
+  function notify(text, good) {
+    let msg = document.querySelector('.ok-msg');
+    if (!msg) {
+      msg = document.createElement('div');
+      msg.className = 'ok-msg';
+      $('copy').after(msg);
+    }
+    msg.style.color = good ? '' : 'var(--warn)';
+    msg.textContent = text;
+  }
+
+  $('send').addEventListener('click', ev => {
+    ev.preventDefault();
+    const d = gather();
+    if (d) window.location.href = mailto(d.subject, d.body);
+  });
+
+  /* A mailto: link does nothing at all when no mail client is registered, which
+     is the normal state for anyone living in webmail. Without this fallback a
+     buyer who has just paid would be staring at a button that silently fails. */
+  $('copy').addEventListener('click', async ev => {
+    ev.preventDefault();
+    const d = gather();
+    if (!d) return;
+    const text = d.subject + '\n\n' + d.body;
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(text);
+      ok = true;
+    } catch (e) {
+      // The Clipboard API needs a secure context and permission. Fall back to
+      // the old textarea trick, which works essentially everywhere.
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;top:-1000px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
+      ta.remove();
+    }
+    notify(ok ? 'Copied. Paste it into an email to ' + cfg.contactEmail
+              : 'Could not copy - please select the details above by hand.', ok);
   });
 
   if (/example\.com$/.test(cfg.contactEmail) || !cfg.demoUrl) {
