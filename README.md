@@ -9,10 +9,16 @@ site/
   activate.html     post-purchase page: collects the buyer's Hardware ID
   404.html          styled not-found page
   CNAME             the custom domain - see the warning below
+  .nojekyll         tells Pages to publish the files as-is
   robots.txt        keeps activate.html out of search results
   sitemap.xml
   assets/           real solver output, logo, and the app's own fonts
 ```
+
+`.nojekyll` switches off Jekyll, which GitHub Pages otherwise runs over the
+repository. Nothing here needs it, and Jekyll silently skips files and folders
+whose names begin with an underscore - a trap worth disarming before it costs
+an afternoon.
 
 **Do not delete `CNAME`.** GitHub Pages reads the custom domain from that file.
 Setting the domain in the repository's Settings creates it on GitHub's side, but
