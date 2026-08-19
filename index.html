@@ -495,7 +495,7 @@ footer a:hover{color:var(--text)}
 const SITE_CONFIG = {
   price:        '$149',
   priceNote:    'one-time',
-  buyUrl:       '',                         // ← NOWPayments checkout link
+  buyUrl:       'https://nowpayments.io/payment/?iid=5807583421',
   demoUrl:      'https://github.com/EndrickN/cstar-site/releases/latest/download/CSTAR_v1.0.exe',
   contactEmail: 'cstar.propulsion@gmail.com',   // ← your address
 };
@@ -512,6 +512,11 @@ const SITE_CONFIG = {
   document.querySelectorAll('[data-buy]').forEach(a => {
     if (cfg.buyUrl) {
       a.href = cfg.buyUrl;
+      // Open checkout in its own tab so this page survives behind it. The
+      // provider may not redirect anywhere useful after payment, and the
+      // buyer still has to come back here for the activation instructions.
+      a.target = '_blank';
+      a.rel = 'noopener';
       a.removeAttribute('data-unset');
     } else if (a.getAttribute('href') !== '#pricing') {
       // No checkout configured yet — take the enquiry by email rather than
