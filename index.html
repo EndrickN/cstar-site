@@ -103,6 +103,9 @@ h3{font-size:19px;font-weight:700;letter-spacing:-.01em}
 .ed-price{font-size:38px;font-weight:800;letter-spacing:-.02em;margin:14px 0 4px}
 .ed-price small{font-size:14px;font-weight:600;color:var(--text-3)}
 .ed-note{color:var(--text-3);font-size:13.5px;margin-bottom:22px}
+.buy-steps{margin-top:14px;font-size:12.5px;line-height:1.62;color:var(--text-3)}
+.buy-steps b{color:var(--text-2);font-weight:600}
+.buy-steps a{color:var(--accent-blue);text-decoration:underline}
 .ed ul{list-style:none;margin:22px 0;flex:1}
 .ed li{display:flex;gap:11px;padding:7px 0;font-size:14.5px;color:var(--text-2);align-items:flex-start}
 .ed li b{color:var(--text);font-weight:600}
@@ -360,6 +363,16 @@ footer a:hover{color:var(--text)}
           <li><span class="tick">✓</span><span>Works fully offline — no phone-home</span></li>
         </ul>
         <a class="btn btn-primary" data-buy href="#">Buy CSTAR</a>
+        <!-- Said here, on a page we control, rather than left to the checkout:
+             the provider hides the order description behind a "more details"
+             toggle almost nobody opens. Surprises at the payment step are what
+             lose the sale, not the payment method itself. -->
+        <p class="buy-steps">
+          Checkout is in crypto — BTC, ETH, USDT and most others.<br>
+          <b>After paying, come back to the
+          <a href="activate.html">activation page</a></b> and send your
+          Hardware ID. Keys are issued by hand, so allow a few hours.
+        </p>
       </div>
     </div>
   </div>
@@ -495,7 +508,7 @@ footer a:hover{color:var(--text)}
 const SITE_CONFIG = {
   price:        '$149',
   priceNote:    'one-time',
-  buyUrl:       'https://nowpayments.io/payment/?iid=5807583421',
+  buyUrl:       'https://nowpayments.io/payment?iid=5103220243',
   demoUrl:      'https://github.com/EndrickN/cstar-site/releases/latest/download/CSTAR_v1.0.exe',
   contactEmail: 'cstar.propulsion@gmail.com',   // ← your address
 };
