@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSTAR — Validation Report</title>
+<meta name="description" content="Every physical model in CSTAR, what it was validated against, and the worst deviation found: 145 operating points against NASA CEA, 6000 states against CoolProp, and method-of-characteristics against exact Prandtl-Meyer theory.">
+<link rel="icon" href="assets/logo.png">
+
+<meta property="og:title" content="CSTAR — Validation Report">
+<meta property="og:description" content="145 points against NASA CEA. 6000 states against CoolProp. Exact Prandtl-Meyer theory. Every tolerance published, including what is not validated.">
+<meta property="og:image" content="https://www.cstar.space/assets/flowfield.png">
+<meta property="og:url" content="https://www.cstar.space/validation.html">
+<meta property="og:type" content="article">
+
+<style>
+@font-face { font-family:'Geist'; src:url('assets/fonts/Geist-Variable.woff2') format('woff2'); font-weight:100 900; font-display:swap; }
+@font-face { font-family:'Geist Mono'; src:url('assets/fonts/GeistMono-Variable.woff2') format('woff2'); font-weight:100 900; font-display:swap; }
+
+:root{
+  --bg-deep:#090d16; --bg-panel:#0f172a; --bg-raise:#131c31;
+  --border:#1e293b; --border-soft:#18233c;
+  --accent:#00b4ff; --green:#84cc16; --warn:#f59e0b; --danger:#f43f5e;
+  --text:#f8fafc; --text-2:#94a3b8; --text-3:#64748b;
+  --radius:10px;
+  --font:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'Geist Mono','JetBrains Mono','Fira Code',Consolas,monospace;
+  --wrap:1000px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg-deep);color:var(--text);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 24px}
+
+.nav{position:sticky;top:0;z-index:50;background:rgba(9,13,22,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:62px;gap:16px;max-width:var(--wrap);margin:0 auto;padding:0 24px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand img{width:28px;height:28px;border-radius:7px;border:1px solid var(--border)}
+.brand b{font-size:17px;letter-spacing:.4px}
+.chip{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;background:var(--border);color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid transparent;border-radius:8px;
+  font-size:13px;font-weight:700;padding:8px 15px;cursor:pointer;text-decoration:none;transition:all .18s;font-family:var(--font)}
+.btn-ghost{background:transparent;color:var(--text);border-color:#2b3a55}
+.btn-ghost:hover{background:rgba(255,255,255,.05);border-color:var(--text-3)}
+
+/* ---------- document ---------- */
+.doc{padding:60px 0 90px}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:1.3px;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+h1{font-size:38px;line-height:1.14;letter-spacing:-.6px;margin-bottom:18px}
+.lede{font-size:17.5px;color:var(--text-2);max-width:70ch}
+.meta{font-family:var(--mono);font-size:12px;color:var(--text-3);margin-top:20px;padding-top:18px;border-top:1px solid var(--border-soft)}
+
+h2{font-size:23px;letter-spacing:-.2px;margin:52px 0 6px;padding-top:30px;border-top:1px solid var(--border-soft)}
+h3{font-size:15.5px;margin:30px 0 8px;color:var(--text)}
+p{color:var(--text-2);margin:12px 0;max-width:74ch}
+p b, li b{color:var(--text);font-weight:600}
+ul{margin:12px 0 12px 20px;color:var(--text-2);max-width:74ch}
+li{margin:6px 0}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-raise);padding:2px 6px;border-radius:4px;color:var(--text)}
+
+/* ---------- verdict strip ---------- */
+.gates{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:14px;margin:34px 0 8px}
+.gate{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px}
+.gate .g-name{font-family:var(--mono);font-size:11.5px;color:var(--text-3);letter-spacing:.6px;text-transform:uppercase}
+.gate .g-num{font-size:29px;font-weight:700;margin:8px 0 2px;letter-spacing:-.5px}
+.gate .g-sub{font-size:13px;color:var(--text-2)}
+.pass{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.7px;
+  color:var(--green);border:1px solid rgba(132,204,22,.35);background:rgba(132,204,22,.08);
+  padding:2px 8px;border-radius:4px;margin-top:12px}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;margin:20px 0;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-panel)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:520px}
+th,td{padding:10px 16px;text-align:left;border-bottom:1px solid var(--border-soft);white-space:nowrap}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.7px;text-transform:uppercase;color:var(--text-3);font-weight:500}
+tr:last-child td{border-bottom:none}
+td{color:var(--text-2)}
+td.n{font-family:var(--mono);color:var(--text)}
+td.ok{font-family:var(--mono);color:var(--green)}
+caption{caption-side:bottom;padding:12px 16px;font-size:12.5px;color:var(--text-3);text-align:left}
+
+/* ---------- callout ---------- */
+.note{border-left:2px solid var(--accent);background:var(--bg-panel);padding:16px 20px;border-radius:0 var(--radius) var(--radius) 0;margin:24px 0}
+.note.limit{border-left-color:var(--warn)}
+.note p{margin:6px 0}
+.note .n-head{font-family:var(--mono);font-size:11px;letter-spacing:.9px;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.note.limit .n-head{color:var(--warn)}
+
+footer{border-top:1px solid var(--border);padding:34px 0;color:var(--text-3);font-size:13.5px}
+footer a{color:var(--text-2)}
+
+@media (max-width:640px){
+  h1{font-size:29px}
+  .lede{font-size:16px}
+  .doc{padding:40px 0 64px}
+  th,td{padding:9px 13px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.png" alt="">
+      <b>CSTAR</b><span class="chip">v1.0</span>
+    </a>
+    <a class="btn btn-ghost" href="index.html">← Back to CSTAR</a>
+  </div>
+</nav>
+
+<div class="doc">
+<div class="wrap">
+
+  <div class="eyebrow">Validation Report</div>
+  <h1>What every model was checked against — and by how much it missed.</h1>
+  <p class="lede">
+    A design tool is worth what its worst case is worth. This page lists the
+    reference each physical model is measured against, the tolerance it must
+    meet before a release ships, and the largest deviation actually found —
+    named by the operating point that produced it.
+  </p>
+  <p class="meta">CSTAR v1.0 · three automated release gates · a build that fails any one of them does not ship</p>
+
+  <div class="gates">
+    <div class="gate">
+      <div class="g-name">Thermochemistry</div>
+      <div class="g-num">2.9<span style="font-size:17px">%</span></div>
+      <div class="g-sub">worst of 145 points vs NASA CEA</div>
+      <div class="pass">PASS · tol 3 %</div>
+    </div>
+    <div class="gate">
+      <div class="g-name">Coolant properties</div>
+      <div class="g-num">4.2<span style="font-size:17px">%</span></div>
+      <div class="g-sub">worst of 6000 states vs CoolProp</div>
+      <div class="pass">PASS · tol 6 %</div>
+    </div>
+    <div class="gate">
+      <div class="g-name">Nozzle characteristics</div>
+      <div class="g-num">0.03<span style="font-size:17px">%</span></div>
+      <div class="g-sub">vs exact Prandtl–Meyer theory</div>
+      <div class="pass">PASS · tol 0.1 %</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ 1 ═══════════════ -->
+  <h2>1 · Equilibrium thermochemistry</h2>
+  <p>
+    Chamber conditions are found by Gibbs free-energy minimisation over the
+    product species, with thermodynamic data from the NASA polynomial database.
+    The reference is <b>NASA CEA</b>, the code the industry treats as ground
+    truth for this calculation.
+  </p>
+  <p>
+    <b>145 operating points</b> across six propellant combinations — methalox,
+    kerolox, hydrolox, ethanol, methanol and propane — sweeping mixture ratio,
+    chamber pressure from 10 to 250 bar, and area ratio from 4 to 150.
+    Nine quantities are compared at every point.
+  </p>
+
+  <div class="tw">
+  <table>
+    <caption>Worst absolute deviation over all 145 points, with the point that produced it.</caption>
+    <thead><tr><th>Quantity</th><th>Worst</th><th>Tolerance</th><th></th><th>Worst case at</th></tr></thead>
+    <tbody>
+      <tr><td>Chamber temperature</td><td class="n">2.686 K</td><td class="n">10 K</td><td class="ok">OK</td><td class="n">kerolox O/F 2.2, 60 bar, ε 16</td></tr>
+      <tr><td>Molecular weight</td><td class="n">0.137 %</td><td class="n">0.5 %</td><td class="ok">OK</td><td class="n">kerolox O/F 2.2, 60 bar, ε 16</td></tr>
+      <tr><td>Isentropic γ</td><td class="n">0.010 %</td><td class="n">0.5 %</td><td class="ok">OK</td><td class="n">kerolox O/F 2.6, 250 bar, ε 4</td></tr>
+      <tr><td>Characteristic velocity c*</td><td class="n">2.923 %</td><td class="n">3 %</td><td class="ok">OK</td><td class="n">kerolox O/F 2.6, 10 bar, ε 4</td></tr>
+      <tr><td>Vacuum specific impulse</td><td class="n">0.029 %</td><td class="n">1 %</td><td class="ok">OK</td><td class="n">kerolox O/F 2.6, 250 bar, ε 4</td></tr>
+      <tr><td>Exit Mach number</td><td class="n">0.031 %</td><td class="n">1 %</td><td class="ok">OK</td><td class="n">kerolox O/F 2.6, 250 bar, ε 150</td></tr>
+      <tr><td>Exit temperature</td><td class="n">0.171 %</td><td class="n">1 %</td><td class="ok">OK</td><td class="n">kerolox O/F 2.6, 250 bar, ε 150</td></tr>
+      <tr><td>Throat temperature</td><td class="n">0.080 %</td><td class="n">1 %</td><td class="ok">OK</td><td class="n">kerolox O/F 2.2, 60 bar, ε 16</td></tr>
+      <tr><td>Pressure ratio p<sub>c</sub>/p<sub>e</sub></td><td class="n">0.092 %</td><td class="n">1 %</td><td class="ok">OK</td><td class="n">kerolox O/F 2.6, 250 bar, ε 150</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <div class="n-head">Reading the c* number honestly</div>
+    <p>
+      2.923 % against a 3 % tolerance is the tightest margin on this page, and
+      it is worth saying where it comes from: low chamber pressure with kerosene,
+      where condensed-phase carbon matters most. Every other quantity sits an
+      order of magnitude inside its limit. The gate is deliberately set where
+      the model is weakest rather than where it looks best.
+    </p>
+  </div>
+
+  <!-- ═══════════════ 2 ═══════════════ -->
+  <h2>2 · Coolant thermophysical properties</h2>
+  <p>
+    Regenerative cooling is only as good as the fluid properties behind it.
+    CSTAR carries embedded property tables for five coolants — RP-1, methane,
+    hydrogen, oxygen and ethanol — so the application runs entirely offline
+    with no dependency to install. The reference is <b>CoolProp</b>.
+  </p>
+  <p>
+    <b>1200 states per fluid, 6000 in total.</b> Four properties are compared:
+    density, specific heat, viscosity and thermal conductivity.
+  </p>
+
+  <div class="tw">
+  <table>
+    <caption>Worst relative error at cell centres. Hydrogen sets every worst case — see below.</caption>
+    <thead><tr><th>Property</th><th>Worst</th><th>Tolerance</th><th></th><th>Worst case at</th></tr></thead>
+    <tbody>
+      <tr><td>Density ρ</td><td class="n">2.005 %</td><td class="n">3 %</td><td class="ok">OK</td><td class="n">hydrogen, 34 K, 33 bar</td></tr>
+      <tr><td>Specific heat c<sub>p</sub></td><td class="n">4.214 %</td><td class="n">6 %</td><td class="ok">OK</td><td class="n">hydrogen, 45 K, 39 bar</td></tr>
+      <tr><td>Viscosity μ</td><td class="n">3.019 %</td><td class="n">4 %</td><td class="ok">OK</td><td class="n">hydrogen, 45 K, 33 bar</td></tr>
+      <tr><td>Conductivity k</td><td class="n">2.036 %</td><td class="n">3 %</td><td class="ok">OK</td><td class="n">hydrogen, 45 K, 33 bar</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Why the errors are sampled at cell centres</h3>
+  <p>
+    Interpolation in a table is <i>exact</i> at the grid nodes. Sampling
+    randomly therefore includes points that sit near nodes and flatters the
+    result — an early version of this test reported errors several times
+    smaller for exactly that reason. Every error above is measured at the
+    <b>cell centre</b>, the point furthest from any node, where bilinear
+    interpolation is at its worst. These are upper bounds, not averages.
+  </p>
+  <p>
+    Hydrogen dominates every row because it is the hardest case in the set:
+    near its critical point the properties change violently over a few kelvin.
+    The other four fluids stay under 1.3 % throughout.
+  </p>
+
+  <!-- ═══════════════ 3 ═══════════════ -->
+  <h2>3 · Method of characteristics</h2>
+  <p>
+    Nozzle contouring uses the method of characteristics. Unlike the two gates
+    above, this one has an <b>exact analytic answer</b> to check against —
+    Prandtl–Meyer theory — so the tolerance can be far tighter.
+  </p>
+
+  <div class="tw">
+  <table>
+    <caption>Across γ from 1.15 to 1.40 and design exit Mach 1.8 to 4.0.</caption>
+    <thead><tr><th>Check</th><th>Worst</th><th>Tolerance</th><th></th><th>Worst case at</th></tr></thead>
+    <tbody>
+      <tr><td>Exit Mach vs exact theory</td><td class="n">0.0031 %</td><td class="n">0.05 %</td><td class="ok">OK</td><td class="n">γ 1.15, M 4.0</td></tr>
+      <tr><td>Mass conservation</td><td class="n">0.0284 %</td><td class="n">0.1 %</td><td class="ok">OK</td><td class="n">γ 1.15, M 4.0</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Mesh convergence</h3>
+  <p>
+    Matching theory at one mesh density proves little on its own. The solution
+    converges at the expected rate as characteristics are added, at γ = 1.22
+    and design Mach 3.0:
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Characteristics</th><th>Exit Mach</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td class="n">20</td><td class="n">2.99869558</td><td>—</td></tr>
+      <tr><td class="n">40</td><td class="n">2.99969996</td><td class="n">3.35 × 10⁻²  %</td></tr>
+      <tr><td class="n">80</td><td class="n">2.99992788</td><td class="n">7.60 × 10⁻³  %</td></tr>
+      <tr><td class="n">160</td><td class="n">2.99998231</td><td class="n">1.81 × 10⁻³  %</td></tr>
+      <tr><td class="n">320</td><td class="n">2.99999562</td><td class="n">4.44 × 10⁻⁴  %</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note limit">
+    <div class="n-head">What is not validated — and therefore refuses to run</div>
+    <p>
+      The axisymmetric branch of the characteristics solver did not pass mass
+      conservation, and the cause was not established with enough confidence to
+      ship it. Rather than return a plausible-looking contour of unknown
+      quality, <b>that code path raises an error and refuses</b>. The planar
+      solver above, which is validated, is what the application uses.
+    </p>
+    <p>
+      A tool that quietly returns a wrong answer is worse than one that stops.
+      This is the only place in CSTAR where a model was written and then
+      deliberately withheld.
+    </p>
+  </div>
+
+  <!-- ═══════════════ 4 ═══════════════ -->
+  <h2>4 · Models validated against literature, not a code</h2>
+  <p>
+    Not every model has a reference implementation to run against. These are
+    implemented from the standard sources and stated as such, so you know
+    exactly what you are relying on:
+  </p>
+  <ul>
+    <li><b>Gas-side heat transfer</b> — Bartz correlation, with the property-ratio correction.</li>
+    <li><b>Coolant-side heat transfer</b> — Gnielinski correlation with the Sieder–Tate wall-viscosity correction; friction from Haaland.</li>
+    <li><b>Channel fin efficiency</b> — analytic fin solution, η = tanh(mL)/mL, rather than an assumed value.</li>
+    <li><b>Liner structural model</b> — Huzel &amp; Huang, NASA SP-125.</li>
+    <li><b>Low-cycle fatigue</b> — Coffin–Manson screening.</li>
+    <li><b>Gas radiation</b> — grey-gas model with an optical-path term. This is the coarsest approximation in the code; a band model would be better and is not implemented.</li>
+  </ul>
+
+  <div class="note">
+    <div class="n-head">How to check this yourself</div>
+    <p>
+      The demo runs the full flow solution on <b>your</b> geometry, not a fixed
+      sample — the thermochemistry and nozzle results above are exactly what it
+      computes. If your engine has known numbers, put them in and compare
+      before you spend anything.
+    </p>
+  </div>
+
+</div>
+</div>
+
+<footer>
+  <div class="wrap">
+    Every figure on this page is the output of an automated release gate, not a
+    hand-picked run. Questions about methodology are welcome —
+    <a href="index.html#faq">FAQ</a> · <a href="index.html">CSTAR</a>
+  </div>
+</footer>
+
+</body>
+</html>
