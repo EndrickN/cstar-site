@@ -1,18 +1,21 @@
-# CSTAR landing page
+# CSTAR site
 
 Static site. No build step, no framework, no dependencies, no external requests
 — the folder is the site.
 
 ```
 site/
-  index.html        the landing page (styles + script inline)
+  index.html        the landing page
+  validation.html   the full validation report (printable)
   activate.html     post-purchase page: collects the buyer's Hardware ID
   404.html          styled not-found page
+  style.css         shared design system and page styles
+  site.js           SITE_CONFIG and shared link wiring
   CNAME             the custom domain - see the warning below
   .nojekyll         tells Pages to publish the files as-is
   robots.txt        keeps activate.html out of search results
   sitemap.xml
-  assets/           real solver output, logo, and the app's own fonts
+  assets/           real solver output, logo, NASA photo, and the app's fonts
 ```
 
 `.nojekyll` switches off Jekyll, which GitHub Pages otherwise runs over the
@@ -31,25 +34,25 @@ travels with everything else.
 
 ## 1. Fill in SITE_CONFIG
 
-At the bottom of `index.html`:
+In `site.js`:
 
 ```js
-const SITE_CONFIG = {
+window.SITE_CONFIG = {
   price:        '$149',
   priceNote:    'one-time',
-  buyUrl:       '',                    // ← NOWPayments checkout link
-  buyCardUrl:   '',                    // ← optional card checkout
+  buyUrl:       'https://nowpayments.io/payment?iid=...',
   demoUrl:      'https://github.com/EndrickN/cstar-site/releases/latest/download/CSTAR_v1.0.exe',
   contactEmail: 'cstar.propulsion@gmail.com',
 };
 ```
 
-`activate.html` has its own smaller copy of `demoUrl` and `contactEmail` — keep
-the two in step.
+Every page loads the same file, so the price, checkout link, demo link and
+contact address are changed once. Links also carry real fallback URLs in the
+HTML; the script only overrides them when a config value is present.
 
-Anything left empty degrades to a `mailto:` link rather than dead-ending a
-visitor, and the browser console lists what is still missing. You can publish
-before payments are wired and take enquiries by email in the meantime.
+Anything left empty leaves the hard-coded link in place rather than dead-ending
+a visitor. You can publish before payments are wired and take enquiries by email
+in the meantime.
 
 ---
 
@@ -79,7 +82,7 @@ cannot exist until the buyer has run the app once and read their Hardware ID.
 generic "thank you" page instead and you will answer *"I paid, where is my
 key?"* by hand for every sale.
 
-**Paste the link** into `buyUrl` and you are selling.
+**Paste the link** into `buyUrl` in `site.js` and you are selling.
 
 ### Fulfilment
 
@@ -117,10 +120,12 @@ That needs a server running permanently, which early sales will not pay for.
 
 ### Adding card payments later
 
-Set `buyCardUrl` and a second button appears automatically. Most engineers reach
-for a corporate card rather than a wallet, and a merchant of record (Paddle,
-Lemon Squeezy) becomes the legal seller and deals with VAT worldwide. Paddle
-also issues company invoices, which matters when the buyer expenses it.
+There is no card-checkout button in the current build. If you add a provider,
+put its link in a second config field and render a second button beside the
+crypto checkout. Most engineers reach for a corporate card rather than a wallet,
+and a merchant of record (Paddle, Lemon Squeezy) becomes the legal seller and
+deals with VAT worldwide. Paddle also issues company invoices, which matters
+when the buyer expenses it.
 
 ---
 
@@ -175,12 +180,13 @@ KPI strip; if those move, update them in `index.html` to match.
 
 ## 5. Launch checklist
 
-- [ ] `buyUrl`, `demoUrl`, `contactEmail` set in **both** `index.html` and `activate.html`
+- [ ] `buyUrl`, `demoUrl`, `contactEmail` set in `site.js` (one place, all pages)
 - [ ] NOWPayments success URL points at `https://YOUR-DOMAIN/activate.html`
-- [ ] Price checked — it appears in three places, all driven by `SITE_CONFIG`
+- [ ] Price checked — every occurrence is driven by `data-price` / `data-price-note`
 - [ ] Hero KPI numbers match the current build
 - [ ] `CSTAR_v1.0.exe` uploaded as a release asset, link tested in a private window
 - [ ] Domain placeholders replaced in `robots.txt` and `sitemap.xml`
-- [ ] Console is clean on the published URL (it warns about missing config)
+- [ ] Console is clean on the published URL
 - [ ] One test purchase end to end, including the activation email
+- [ ] Validation report prints cleanly to PDF
 - [ ] Terms of sale, privacy notice, and — as a German business — an Impressum
