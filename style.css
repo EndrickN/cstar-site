@@ -441,10 +441,16 @@ p { max-width: 70ch; }
 .capabilities .section-head { max-width: 860px; }
 .plot-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 56px 48px;
+  grid-template-columns: 1fr;
+  gap: 64px;
 }
-.plot-card { min-width: 0; }
+.plot-card {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 40px;
+  align-items: start;
+  min-width: 0;
+}
 .plot {
   background: var(--dark);
   aspect-ratio: 16 / 10;
@@ -454,8 +460,8 @@ p { max-width: 70ch; }
   overflow: hidden;
 }
 .plot img { width: 100%; height: auto; transition: transform .5s var(--ease); }
-.plot-card:hover .plot img { transform: scale(1.015); }
-.plot-card figcaption { padding-top: 18px; }
+.plot-card:hover .plot img { transform: scale(1.012); }
+.plot-card figcaption { padding-top: 2px; }
 .plot-card figcaption p {
   margin-top: 8px;
   font-size: 16px;
@@ -1045,6 +1051,8 @@ p { max-width: 70ch; }
   .split .section-head { margin-bottom: 8px; }
   .section-head.wide { margin-bottom: 32px; }
   .plot-grid { grid-template-columns: 1fr; gap: 44px; }
+  .plot-card { grid-template-columns: 1fr; gap: 18px; }
+  .plot-card figcaption { padding-top: 0; }
   .after-buy ol { grid-template-columns: 1fr; gap: 20px; }
   .close { padding: 88px 0 80px; }
   .close-facts { margin-top: 48px; gap: 24px; }
